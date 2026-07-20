@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <i class="bi bi-journal-text display-5 text-primary"></i>
+                <h3>{{ total_exams }}</h3>
+                <p>Total Exams</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <i class="bi bi-book display-5 text-success"></i>
+                <h3>{{ total_subjects }}</h3>
+                <p>Subjects</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <i class="bi bi-emoji-smile display-5 text-info"></i>
+                <h3>{{ total_easy }}</h3>
+                <p>Easy Exams</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <i class="bi bi-fire display-5 text-danger"></i>
+                <h3>{{ total_hard }}</h3>
+                <p>Hard Exams</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card shadow">
+
+    <div class="card-header bg-dark text-white">
+        Recent Exams
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Difficulty</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for exam in recent_exams %}
+                    <tr>
+                        <td>{{ exam.title }}</td>
+                        <td>{{ exam.subject }}</td>
+                        <td>{{ exam.difficulty }}</td>
+                        <td>{{ exam.created_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
