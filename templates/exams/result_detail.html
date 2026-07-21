@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Result{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="card-title">Exam Result</h2>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <p><strong>Student:</strong> {{ attempt.student.username }}</p>
+                <p><strong>Exam:</strong> {{ attempt.exam.title }}</p>
+                <p><strong>Subject:</strong> {{ attempt.exam.subject }}</p>
+            </div>
+
+            <div class="col-md-6 text-md-end">
+                <h3 class="text-primary">
+                    {{ attempt.score }} / {{ attempt.total_marks }}
+                </h3>
+
+                <h5>
+                    Percentage: {{ attempt.percentage }}%
+                </h5>
+
+                {% if attempt.percentage >= 40 %}
+                    <span class="badge bg-success fs-6">PASS</span>
+                {% else %}
+                    <span class="badge bg-danger fs-6">FAIL</span>
+                {% endif %}
+
+                <p class="mt-2 text-muted">
+                    Submitted: {{ attempt.submitted_at|date:"d M Y H:i" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4 class="mb-3">Question Analysis</h4>
+
+{% for answer in answers %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-header">
+            <strong>Question {{ forloop.counter }}</strong>
+        </div>
+
+        <div class="card-body">
+            <p class="fw-bold">{{ answer.question.question_text }}</p>
+
+            <p>
+                <strong>Your Answer:</strong>
+                {% if answer.selected_option %}
+                    {{ answer.selected_option.option_text }}
+                {% else %}
+                    <span class="text-muted">Not answered</span>
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Correct Answer:</strong>
+                {% for option in answer.question.options.all %}
+                    {% if option.is_correct %}
+                        <span class="text-success">{{ option.option_text }}</span>
+                    {% endif %}
+                {% endfor %}
+            </p>
+
+            <p>
+                <strong>Marks Awarded:</strong>
+                {{ answer.marks_awarded }} / {{ answer.question.marks }}
+            </p>
+
+            {% if answer.question.explanation %}
+                <div class="alert alert-info mt-3">
+                    <strong>Explanation:</strong><br>
+                    {{ answer.question.explanation }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<div class="mt-4">
+    <a href="{% url 'result_list' %}" class="btn btn-outline-primary">
+        View All Results
+    </a>
+
+    <a href="{% url 'exam_list' %}" class="btn btn-secondary">
+        Back to Exams
+    </a>
+</div>
+
+{% endblock %}

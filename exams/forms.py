@@ -1,7 +1,9 @@
 from django import forms
-from .models import Exam
+from django.forms import inlineformset_factory
+from .models import Exam, Question, Option
 
 
+# Existing Exam form (required by views.py)
 class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
@@ -9,17 +11,39 @@ class ExamForm(forms.ModelForm):
             'title',
             'subject',
             'description',
-            'difficulty',
             'duration_minutes',
+            'difficulty'
         ]
-
         widgets = {
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4
-            }),
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'subject': forms.TextInput(attrs={'class': 'form-control'}),
-            'difficulty': forms.Select(attrs={'class': 'form-select'}),
-            'duration_minutes': forms.NumberInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 4}),
         }
+
+
+# Question form
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['question_text', 'marks', 'explanation']
+        widgets = {
+            'question_text': forms.Textarea(attrs={'rows': 3}),
+            'explanation': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+# Option form
+class OptionForm(forms.ModelForm):
+    class Meta:
+        model = Option
+        fields = ['option_text', 'is_correct']
+
+
+# Inline formset for options
+OptionFormSet = inlineformset_factory(
+    Question,
+    Option,
+    form=OptionForm,
+    extra=4,
+    min_num=2,
+    validate_min=True,
+    can_delete=False
+)

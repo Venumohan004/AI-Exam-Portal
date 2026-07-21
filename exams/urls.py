@@ -1,16 +1,14 @@
 from django.urls import path
-from .views import (
-    ExamListView,
-    ExamDetailView,
-    ExamCreateView,
-    ExamUpdateView,
-    ExamDeleteView,
-)
+from . import views
 
 urlpatterns = [
-    path('', ExamListView.as_view(), name='exam_list'),
-    path('create/', ExamCreateView.as_view(), name='exam_create'),
-    path('<int:pk>/', ExamDetailView.as_view(), name='exam_detail'),
-    path('<int:pk>/edit/', ExamUpdateView.as_view(), name='exam_update'),
-    path('<int:pk>/delete/', ExamDeleteView.as_view(), name='exam_delete'),
+    path('', views.exam_list, name='exam_list'),
+    path('<int:pk>/', views.exam_detail, name='exam_detail'),
+
+    path('<int:pk>/start/', views.StartExamView.as_view(), name='start_exam'),
+    path('attempt/<int:attempt_id>/', views.TakeExamView.as_view(), name='take_exam'),
+    path('attempt/<int:attempt_id>/submit/', views.SubmitExamView.as_view(), name='submit_exam'),
+
+    path('results/', views.ResultListView.as_view(), name='result_list'),
+    path('results/<int:pk>/', views.ResultDetailView.as_view(), name='result_detail'),
 ]

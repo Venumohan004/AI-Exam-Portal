@@ -5,27 +5,25 @@
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Exams</h2>
-
-    {% if user.is_authenticated %}
-        <a href="{% url 'exam_create' %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Create Exam
-        </a>
-    {% endif %}
+    <h2>Available Exams</h2>
 </div>
 
 <form method="get" class="row g-2 mb-4">
 
     <div class="col-md-4">
-        <input type="text" name="q" class="form-control"
+        <input type="text"
+               name="q"
+               class="form-control"
                placeholder="Search by title"
-               value="{{ request.GET.q }}">
+               value="{{ query|default:'' }}">
     </div>
 
     <div class="col-md-3">
-        <input type="text" name="subject" class="form-control"
+        <input type="text"
+               name="subject"
+               class="form-control"
                placeholder="Filter by subject"
-               value="{{ request.GET.subject }}">
+               value="{{ subject|default:'' }}">
     </div>
 
     <div class="col-md-3">
@@ -33,65 +31,78 @@
             <option value="">All Difficulties</option>
 
             <option value="Easy"
-                {% if request.GET.difficulty == 'Easy' %}selected{% endif %}>
+                {% if difficulty == 'Easy' %}selected{% endif %}>
                 Easy
             </option>
 
             <option value="Medium"
-                {% if request.GET.difficulty == 'Medium' %}selected{% endif %}>
+                {% if difficulty == 'Medium' %}selected{% endif %}>
                 Medium
             </option>
 
             <option value="Hard"
-                {% if request.GET.difficulty == 'Hard' %}selected{% endif %}>
+                {% if difficulty == 'Hard' %}selected{% endif %}>
                 Hard
             </option>
         </select>
     </div>
 
     <div class="col-md-2">
-        <button class="btn btn-dark w-100">Apply</button>
+        <button type="submit" class="btn btn-dark w-100">
+            Apply
+        </button>
     </div>
 </form>
 
 <div class="row">
-    {% for exam in exams %}
+    {% for exam in page_obj.object_list %}
         <div class="col-md-6 mb-3">
             <div class="card h-100 shadow-sm">
 
                 <div class="card-body">
                     <h5 class="card-title">{{ exam.title }}</h5>
 
-                    <p class="text-muted">
-                        {{ exam.subject }} | {{ exam.difficulty }}
+                    <p class="text-muted mb-2">
+                        {{ exam.subject }} |
+                        {{ exam.difficulty }} |
+                        {{ exam.duration_minutes }} min
                     </p>
 
                     <p>{{ exam.description|truncatechars:100 }}</p>
 
-                    <a href="{% url 'exam_detail' exam.pk %}"
-                       class="btn btn-outline-primary btn-sm">
-                        View
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'exam_detail' exam.pk %}"
+                           class="btn btn-outline-primary btn-sm">
+                            View
+                        </a>
+
+                        <a href="{% url 'start_exam' exam.pk %}"
+                           class="btn btn-success btn-sm">
+                            Start Exam
+                        </a>
+                    </div>
                 </div>
 
             </div>
         </div>
     {% empty %}
         <div class="col-12">
-            <div class="alert alert-warning">No exams found.</div>
+            <div class="alert alert-warning">
+                No exams found.
+            </div>
         </div>
     {% endfor %}
 </div>
 
 <!-- Pagination -->
-{% if is_paginated %}
+{% if page_obj.has_other_pages %}
 <nav>
     <ul class="pagination justify-content-center">
 
         {% if page_obj.has_previous %}
             <li class="page-item">
                 <a class="page-link"
-                   href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}&subject={{ request.GET.subject }}&difficulty={{ request.GET.difficulty }}">
+                   href="?page={{ page_obj.previous_page_number }}&q={{ query }}&subject={{ subject }}&difficulty={{ difficulty }}">
                     Previous
                 </a>
             </li>
@@ -100,7 +111,7 @@
         {% for num in page_obj.paginator.page_range %}
             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
                 <a class="page-link"
-                   href="?page={{ num }}&q={{ request.GET.q }}&subject={{ request.GET.subject }}&difficulty={{ request.GET.difficulty }}">
+                   href="?page={{ num }}&q={{ query }}&subject={{ subject }}&difficulty={{ difficulty }}">
                     {{ num }}
                 </a>
             </li>
@@ -109,7 +120,7 @@
         {% if page_obj.has_next %}
             <li class="page-item">
                 <a class="page-link"
-                   href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}&subject={{ request.GET.subject }}&difficulty={{ request.GET.difficulty }}">
+                   href="?page={{ page_obj.next_page_number }}&q={{ query }}&subject={{ subject }}&difficulty={{ difficulty }}">
                     Next
                 </a>
             </li>
