@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container mt-5">
+
+
+    <h2 class="mb-4">
+        🤖 AI Performance Feedback
+    </h2>
+
+
+    <div class="card shadow p-4">
+
+
+        <h4>
+            {{ attempt.exam.title }}
+        </h4>
+
+
+        <hr>
+
+
+        <h5>
+            📊 Performance Summary
+        </h5>
+
+
+        <p>
+            Score:
+
+            <strong>
+                {{ attempt.score }}/{{ attempt.total_marks }}
+            </strong>
+
+        </p>
+
+
+        <p>
+
+            Percentage:
+
+            <strong>
+                {{ attempt.percentage }}%
+            </strong>
+
+        </p>
+
+
+
+        {% if attempt.percentage >= 80 %}
+
+
+        <div class="alert alert-success">
+
+            🎉 Excellent Performance!
+
+            <br>
+
+            You have strong understanding of this topic.
+
+        </div>
+
+
+        {% elif attempt.percentage >= 40 %}
+
+
+        <div class="alert alert-warning">
+
+            👍 Good Attempt!
+
+            <br>
+
+            Continue practicing to improve.
+
+        </div>
+
+
+        {% else %}
+
+
+        <div class="alert alert-danger">
+
+            💪 Need More Practice!
+
+            <br>
+
+            Revise concepts and attempt again.
+
+        </div>
+        {% endif %}
+
+        <h5 class="mt-4">
+            💡 AI Suggestions
+        </h5>
+        <ul>
+            <li>
+                Revise incorrect answers.
+            </li>
+            <li>
+                Practice more questions from {{ attempt.exam.subject }}.
+            </li>
+            <li>
+                Focus on weak topics.
+            </li>
+            <li>
+                Review explanations after every attempt.
+            </li>
+        </ul>
+            <div class="mt-4 d-flex gap-2">
+
+                <a href="{% url 'result_detail' attempt.id %}"
+                class="btn btn-primary">
+                    ⬅ Back to Result
+                </a>
+
+                <a href="{% url 'exam_list' %}"
+                class="btn btn-secondary">
+                    📝 Attempt Another Exam
+                </a>
+
+            </div>
+    </div>
+
+
+</div>
+
+
+{% endblock %}

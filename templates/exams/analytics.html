@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container mt-4">
+
+
+<h2 class="mb-4">
+📊 Performance Analytics
+</h2>
+
+
+<div class="row">
+
+
+<div class="col-md-3">
+
+<div class="card shadow p-3 text-center">
+
+<h6>Total Exams</h6>
+
+<h2>
+{{ total_exams }}
+</h2>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<div class="card shadow p-3 text-center">
+
+<h6>Average Score</h6>
+
+<h2>
+{{ average_score }}
+</h2>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<div class="card shadow p-3 text-center">
+
+<h6>Highest Score</h6>
+
+<h2>
+{{ highest_score }}
+</h2>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<div class="card shadow p-3 text-center">
+
+<h6>Pass %</h6>
+
+<h2>
+{{ pass_percentage }}%
+</h2>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<hr class="mt-4">
+
+
+<h3>
+Exam History
+</h3>
+
+
+<table class="table table-bordered mt-3">
+
+
+<thead class="table-dark">
+
+<tr>
+
+<th>
+Exam
+</th>
+
+
+<th>
+Score
+</th>
+
+
+<th>
+Percentage
+</th>
+
+
+<th>
+Status
+</th>
+
+
+<th>
+Date
+</th>
+
+
+</tr>
+
+</thead>
+
+
+
+<tbody>
+
+
+{% for attempt in attempts %}
+
+
+<tr>
+
+
+<td>
+{{ attempt.exam.title }}
+</td>
+
+
+
+<td>
+{{ attempt.score }}/{{ attempt.total_marks }}
+</td>
+
+
+
+<td>
+{{ attempt.percentage }}%
+</td>
+
+
+
+<td>
+
+
+{% if attempt.is_passed %}
+
+<span class="badge bg-success">
+PASS
+</span>
+
+
+{% else %}
+
+<span class="badge bg-danger">
+FAIL
+</span>
+
+
+{% endif %}
+
+
+</td>
+
+
+
+<td>
+{{ attempt.submitted_at|date:"d M Y" }}
+</td>
+
+
+</tr>
+
+
+
+{% empty %}
+
+
+<tr>
+
+<td colspan="5" class="text-center">
+
+No exams attempted
+
+</td>
+
+</tr>
+
+
+{% endfor %}
+
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+{% endblock %}

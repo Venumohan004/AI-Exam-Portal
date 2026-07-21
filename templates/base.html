@@ -18,7 +18,7 @@
         <div class="ms-auto d-flex align-items-center gap-3">
             <a href="{% url 'dashboard' %}" class="text-white text-decoration-none">Dashboard</a>
             <a href="{% url 'exam_list' %}" class="text-white text-decoration-none">Exams</a>
-
+            <a href="{% url 'performance_analytics' %}" class="text-white text-decoration-none">📊 Analytics</a>
             {% if user.is_authenticated %}
                 <span class="text-white">Hi, {{ user.username }}</span>
 
