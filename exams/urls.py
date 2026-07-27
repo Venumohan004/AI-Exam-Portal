@@ -17,6 +17,7 @@ from .views import (
     AIFeedbackView,
     generate_ai_analysis,
     download_result_pdf,
+    DownloadCertificateView
 )
 
 
@@ -55,7 +56,12 @@ urlpatterns = [
         ExamDeleteView.as_view(),
         name='exam_delete'
     ),
-
+    
+    path(
+        "exam/<int:pk>/instructions/",
+        views.ExamInstructionsView.as_view(),
+        name="exam_instructions",
+    ),
 
     # ==========================
     # Exam Engine
@@ -110,6 +116,11 @@ urlpatterns = [
         "result/<int:pk>/download/",
         download_result_pdf,
         name="download_result_pdf",
+    ),
+    path(
+        "certificate/<int:pk>/",
+        DownloadCertificateView.as_view(),
+        name="download_certificate",
     ),
     # ==========================
     # AI Performance Analysis

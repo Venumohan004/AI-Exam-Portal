@@ -60,7 +60,10 @@ class Question(models.Model):
         on_delete=models.CASCADE,
         related_name="questions"
     )
-
+    question_number = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
     question_text = models.TextField()
 
     marks = models.PositiveIntegerField(
@@ -77,31 +80,23 @@ class Question(models.Model):
 
 
     class Meta:
-        ordering = ['id']
-
+        ordering = ['question_number']
 
     def __str__(self):
-        return f"{self.exam.title} - Q{self.id}"
+        return f"{self.exam.title} - Question {self.question_number}"
 
+    def save(self, *args, **kwargs):
 
+        if not self.question_number:
 
-    def clean(self):
-
-        if not self.pk:
-            return
-
-
-        correct_count = self.options.filter(
-            is_correct=True
-        ).count()
-
-
-        if correct_count != 1:
-            raise ValidationError(
-                "Each question must have exactly one correct option."
+            last_question = (
+                Question.objects.filter(exam=self.exam)
+                .aggregate(models.Max("question_number"))["question_number__max"] or 0
             )
 
+            self.question_number = last_question + 1
 
+        super().save(*args, **kwargs)
 
 # =========================
 # Option Model
@@ -163,7 +158,7 @@ class ExamAttempt(models.Model):
     )
 
 
-    score = models.PositiveIntegerField(
+    score = models.FloatField(
         default=0
     )
 
@@ -267,7 +262,7 @@ class StudentAnswer(models.Model):
     )
 
 
-    marks_awarded = models.PositiveIntegerField(
+    marks_awarded = models.FloatField(
         default=0
     )
 

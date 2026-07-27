@@ -23,13 +23,17 @@
 
     <div class="text-end">
 
-        <div class="badge bg-danger fs-5 p-3" id="timer">
-
-            Loading...
-
-        </div>
-
+    <div class="badge bg-danger fs-5 p-3" id="timer">
+        Loading...
     </div>
+
+    <div id="timeWarning"
+         class="text-danger fw-bold mt-2 d-none text-center fw-bold ">
+        ⏰ Only <span id="warningSeconds">10</span> seconds remaining!
+        Exam will submit automatically.
+    </div>
+
+</div>
 
 </div>
 
@@ -45,7 +49,7 @@
 
             <div class="card-header d-flex justify-content-between align-items-center">
 
-                <strong>Question {{ forloop.counter }}</strong>
+                <strong>Question {{ question.question_number }}</strong>
 
                 <span class="badge bg-primary">
 
@@ -65,7 +69,7 @@
                 </p>
 
 
-                {% for option in question.options.all %}
+                {% for option in question.random_options %}
 
                     <div class="form-check mb-3">
 
@@ -195,68 +199,89 @@ window.addEventListener("load", function() {
 });
 
 </script>
-
-
 <!-- Timer Script -->
 <script>
-
 const durationMinutes = {{ attempt.exam.duration_minutes }};
 
-let timeLeft = durationMinutes * 60;
+const examStart = new Date("{{ attempt.started_at|date:'c' }}");
 
+const serverTime = new Date("{{ server_time|date:'c' }}");
 
-function updateTimer() {
+const elapsedSeconds =
+Math.floor((serverTime-examStart)/1000);
 
-    const minutes = Math.floor(timeLeft / 60);
+let timeLeft =
+(durationMinutes*60)-elapsedSeconds;
 
-    const seconds = timeLeft % 60;
+if(timeLeft<0){
+    timeLeft=0;
+}
 
+let popupShown=false;
 
-    document.getElementById('timer').textContent =
-        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+let popupSeconds=10;
 
+let popupInterval=null;
 
-    // Warning when 5 minutes remain
-    if (timeLeft <= 300) {
+function updateTimer(){
 
-        const timer = document.getElementById('timer');
+    const minutes=Math.floor(timeLeft/60);
 
-        timer.classList.remove('bg-danger');
+    const seconds=timeLeft%60;
 
-        timer.classList.add('bg-warning', 'text-dark');
+    document.getElementById("timer").innerHTML=
+    `${minutes}:${seconds.toString().padStart(2,"0")}`;
+
+    if(timeLeft<=300){
+
+        const timer=document.getElementById("timer");
+
+        timer.classList.remove("bg-danger");
+
+        timer.classList.add("bg-warning","text-dark");
 
     }
 
+   if (timeLeft <= 10) {
 
-    // Auto submit when time is up
+        const warning = document.getElementById("timeWarning");
+
+        warning.classList.remove("d-none");
+
+        document.getElementById("warningSeconds").textContent = timeLeft;
+    }
+    else{
+
+        document.getElementById("timeWarning")
+                .classList.add("d-none");
+    }
+
     if (timeLeft <= 0) {
 
         clearInterval(timerInterval);
 
-        alert('⏰ Time is up! Exam will be submitted automatically.');
+        localStorage.removeItem(
+            "exam_answers_{{ attempt.id }}"
+        );
 
-        // Submit form automatically
-        const form = document.getElementById('examForm');
+        const form = document.getElementById("examForm");
 
         form.action = "{% url 'submit_exam' attempt.id %}";
 
-        form.method = "post";
+        form.method = "POST";
 
         form.submit();
 
         return;
-
     }
 
     timeLeft--;
 
 }
 
-
-const timerInterval = setInterval(updateTimer, 1000);
+const timerInterval=setInterval(updateTimer,1000);
 
 updateTimer();
-
 </script>
 
 {% endblock %}

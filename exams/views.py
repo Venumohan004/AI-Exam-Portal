@@ -38,10 +38,7 @@ from django.http import (
     JsonResponse,
     FileResponse
 )
-
-
 from .forms import ExamForm
-
 
 from .models import (
     Exam,
@@ -63,6 +60,9 @@ from reportlab.pdfgen import canvas
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import ExamAttempt
+
+from .certificate_utils import build_certificate_pdf
+
 # ==================================================
 # Exam CRUD
 # ==================================================
@@ -363,16 +363,8 @@ class StartExamView(LoginRequiredMixin, View):
             attempt_id=attempt.id
         )
 
-
-
-
-
 class TakeExamView(LoginRequiredMixin, View):
-
     template_name = "exams/take_exam.html"
-
-
-
     def get(self,request,attempt_id):
 
         attempt = get_object_or_404(
@@ -389,25 +381,18 @@ class TakeExamView(LoginRequiredMixin, View):
         if attempt.is_submitted:
 
             return redirect(
-
                 "result_detail",
-
                 pk=attempt.id
-
             )
-
-
 
         questions = (
-
             attempt.exam.questions
-
-            .prefetch_related(
-                "options"
-            )
-
+            .order_by("question_number")  # Keep questions in order
+            .prefetch_related("options")
         )
-
+        # Randomize only options
+        for question in questions:
+            question.random_options = question.options.order_by("?")
 
         existing_answers = {
 
@@ -427,20 +412,12 @@ class TakeExamView(LoginRequiredMixin, View):
             self.template_name,
 
             {
-
                 "attempt":attempt,
-
                 "questions":questions,
-
-                "existing_answers":
-                existing_answers
-
+                "existing_answers": existing_answers,
+                "server_time": timezone.now(),
             }
-
         )
-
-
-
 
     def post(self,request,attempt_id):
 
@@ -599,28 +576,19 @@ class SubmitExamView(LoginRequiredMixin,View):
 
 
 
+                negative_marks = question.marks * 0.25
+
                 if option.is_correct:
 
-
-                    answer.marks_awarded = (
-                        question.marks
-                    )
-
-
+                    answer.marks_awarded = question.marks
                     score += question.marks
-
-
-
+            
                 else:
 
-
-                    answer.marks_awarded = 0
-
-
+                    answer.marks_awarded = -negative_marks
+                    score -= negative_marks
 
                 answer.save()
-
-
 
         attempt.score = score
 
@@ -631,8 +599,6 @@ class SubmitExamView(LoginRequiredMixin,View):
         attempt.submitted_at = timezone.now()
 
         attempt.save()
-
-
 
         # ================================
         # Generate AI Feedback
@@ -690,11 +656,6 @@ class SubmitExamView(LoginRequiredMixin,View):
             pk=attempt.id
 
         )
-
-
-
-
-
 # ==================================================
 # Results
 # ==================================================
@@ -706,62 +667,65 @@ class ResultDetailView(LoginRequiredMixin,View):
 
 
 
-    def get(self,request,pk):
-
+    def get(self, request, pk):
 
         attempt = get_object_or_404(
-
             ExamAttempt,
-
             id=pk,
-
             student=request.user
-
         )
-
-
 
         answers = attempt.answers.select_related(
-
             "question",
-
             "selected_option"
-
         )
 
+        correct = 0
+        wrong = 0
+        unanswered = 0
+        negative_marks = 0
 
+        for answer in answers:
 
-        analysis = analyze_performance(
+            if answer.selected_option is None:
+                unanswered += 1
 
-            attempt
+            elif answer.selected_option.is_correct:
+                correct += 1
 
-        )
+            else:
+                wrong += 1
 
+                if answer.marks_awarded < 0:
+                    negative_marks += abs(answer.marks_awarded)
 
+        total_questions = attempt.exam.questions.count()
+
+        unanswered = total_questions - (correct + wrong)
+
+        if attempt.submitted_at:
+            time_taken = round((
+                attempt.submitted_at - attempt.started_at
+            ).total_seconds() / 60,2)
+        else:
+            time_taken = 0
+
+        analysis = analyze_performance(attempt)
 
         return render(
-
             request,
-
             self.template_name,
-
             {
-
-                "attempt":attempt,
-
-                "answers":answers,
-
-                "analysis":analysis
-
-            }
-
+                "attempt": attempt,
+                "answers": answers,
+                "analysis": analysis,
+                "correct": correct,
+                "wrong": wrong,
+                "unanswered": unanswered,
+                "negative_marks": negative_marks,
+                "time_taken": time_taken,
+            },
         )
-
-
-
-
-
-
 class ResultListView(LoginRequiredMixin,View):
 
     template_name="exams/result_list.html"
@@ -1126,3 +1090,48 @@ def download_result_pdf(request, pk):
     p.save()
 
     return response
+
+
+class ExamInstructionsView(LoginRequiredMixin, DetailView):
+    model = Exam
+    template_name = "exams/instructions.html"
+    context_object_name = "exam"
+
+
+class DownloadCertificateView(LoginRequiredMixin, View):
+
+    def get(self, request, pk):
+
+        attempt = get_object_or_404(
+            ExamAttempt,
+            id=pk,
+            student=request.user
+        )
+
+        # Allow only passed students
+        if not attempt.is_passed:
+
+            messages.error(
+                request,
+                "You must pass the exam to download the certificate."
+            )
+
+            return redirect(
+                "result_detail",
+                pk=attempt.id
+            )
+
+        buffer = BytesIO()
+
+        build_certificate_pdf(
+            buffer,
+            attempt
+        )
+
+        buffer.seek(0)
+
+        return FileResponse(
+            buffer,
+            as_attachment=True,
+            filename=f"certificate_{attempt.id}.pdf"
+        )
