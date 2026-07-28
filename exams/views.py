@@ -1,16 +1,15 @@
 # exams/views.py
-
 from io import BytesIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 from django.shortcuts import (
     render,
     redirect,
     get_object_or_404
 )
-
 from django.urls import reverse_lazy
 
 from django.views import View
@@ -28,12 +27,8 @@ from django.utils import timezone
 
 from django.db.models import (
     Avg,
-    Max,
-    Count
+    Max
 )
-
-from django.db.models.functions import TruncMonth
-
 from django.http import (
     JsonResponse,
     FileResponse
@@ -48,18 +43,11 @@ from .models import (
     StudentAnswer,
     AIAnalysis
 )
-
-
 from .utils import analyze_performance
-
 from .pdf_utils import build_result_pdf
-
 from .services.ai_analyzer import generate_ai_feedback
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import ExamAttempt
 
 from .certificate_utils import build_certificate_pdf
 
@@ -109,19 +97,11 @@ class ExamListView(ListView):
 
 
         return queryset
-
-
-
-
 class ExamDetailView(DetailView):
 
     model = Exam
 
     template_name = "exams/exam_detail.html"
-
-
-
-
 class ExamCreateView(LoginRequiredMixin, CreateView):
 
     model = Exam
@@ -145,9 +125,6 @@ class ExamCreateView(LoginRequiredMixin, CreateView):
         )
 
         return super().form_valid(form)
-
-
-
 
 class ExamUpdateView(LoginRequiredMixin, UpdateView):
 
@@ -199,109 +176,137 @@ class ExamDeleteView(LoginRequiredMixin, DeleteView):
 # ==================================================
 # Dashboard
 # ==================================================
-
-
-class DashboardView(LoginRequiredMixin,TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
 
     template_name = "dashboard.html"
 
-
-
-    def get_context_data(self,**kwargs):
+    def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
-
 
         attempts = ExamAttempt.objects.filter(
             student=self.request.user,
             is_submitted=True
-        )
+        ).select_related("exam")
 
-
-        percentages=[]
-
+        # -----------------------------
+        # Overall Statistics
+        # -----------------------------
+        percentages = []
 
         for attempt in attempts:
-
-            if attempt.total_marks:
-
+            if attempt.total_marks > 0:
                 percentages.append(
-                    (
-                        attempt.score /
-                        attempt.total_marks
-                    ) * 100
+                    (attempt.score / attempt.total_marks) * 100
                 )
 
-
         average_score = (
-            sum(percentages)/len(percentages)
+            round(sum(percentages) / len(percentages), 2)
             if percentages else 0
         )
-
 
         highest_score = (
-            max(percentages)
+            round(max(percentages), 2)
             if percentages else 0
         )
 
-
-        passed = len(
-            [
-                p for p in percentages
-                if p>=40
-            ]
+        passed_count = sum(
+            1 for p in percentages if p >= 40
         )
 
+        failed_count = len(percentages) - passed_count
 
         pass_percentage = (
-
-            (passed/len(percentages))*100
-
+            round((passed_count / len(percentages)) * 100, 2)
             if percentages else 0
-
         )
 
+        # -----------------------------
+        # Subject-wise Average (%)
+        # -----------------------------
+        subject_stats = []
 
+        subjects = attempts.values_list(
+            "exam__subject",
+            flat=True
+        ).distinct()
 
+        for subject in subjects:
+
+            subject_attempts = attempts.filter(
+                exam__subject=subject
+            )
+
+            subject_percentages = []
+
+            for attempt in subject_attempts:
+
+                if attempt.total_marks > 0:
+                    subject_percentages.append(
+                        (attempt.score / attempt.total_marks) * 100
+                    )
+
+            avg_percentage = (
+                round(
+                    sum(subject_percentages) / len(subject_percentages),
+                    2
+                )
+                if subject_percentages else 0
+            )
+
+            subject_stats.append({
+                "exam__subject": subject,
+                "avg_score": avg_percentage,
+            })
+
+        # -----------------------------
+        # Monthly Attempts
+        # -----------------------------
+        monthly_attempts = (
+            attempts
+            .annotate(month=TruncMonth("submitted_at"))
+            .values("month")
+            .annotate(count=Count("id"))
+            .order_by("month")
+        )
+
+        # -----------------------------
+        # Context
+        # -----------------------------
         context.update({
 
-            "total_exams":
-            Exam.objects.count(),
+            "total_exams": Exam.objects.count(),
 
+            "total_attempts": attempts.count(),
 
-            "total_attempts":
-            attempts.count(),
+            "average_score": average_score,
 
+            "highest_score": highest_score,
 
-            "average_score":
-            round(average_score,2),
+            "pass_percentage": pass_percentage,
 
+            "passed_count": passed_count,
 
-            "highest_score":
-            round(highest_score,2),
+            "failed_count": failed_count,
 
+            "pass_count": passed_count,
 
-            "pass_percentage":
-            round(pass_percentage,2),
+            "fail_count": failed_count,
 
+            "subject_stats": subject_stats,
 
-            "recent_attempts":
-            attempts.select_related(
-                "exam"
-            ).order_by(
+            "monthly_attempts": monthly_attempts,
+
+            "recent_attempts": attempts.order_by(
                 "-submitted_at"
-            )[:5]
+            )[:5],
 
         })
 
-
         return context
-    
 # ==================================================
 # Exam Engine
 # ==================================================
-
-
 class StartExamView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
@@ -466,9 +471,6 @@ class TakeExamView(LoginRequiredMixin, View):
                     }
 
                 )
-
-
-
         messages.success(
 
             request,
@@ -518,17 +520,9 @@ class SubmitExamView(LoginRequiredMixin,View):
                 "result_detail",
 
                 pk=attempt.id
-
             )
-
-
-
         total_marks = 0
-
         score = 0
-
-
-
         for question in attempt.exam.questions.all():
 
 
@@ -582,7 +576,7 @@ class SubmitExamView(LoginRequiredMixin,View):
 
                     answer.marks_awarded = question.marks
                     score += question.marks
-            
+
                 else:
 
                     answer.marks_awarded = -negative_marks
@@ -763,8 +757,6 @@ class ResultListView(LoginRequiredMixin,View):
 # ==================================================
 # Performance Analytics
 # ==================================================
-
-
 class PerformanceAnalyticsView(
     LoginRequiredMixin,
     TemplateView
@@ -778,85 +770,69 @@ class PerformanceAnalyticsView(
 
         context = super().get_context_data(**kwargs)
 
-
-
         attempts = ExamAttempt.objects.filter(
-
             student=self.request.user,
-
             is_submitted=True
-
         )
 
+        subject_stats = (
+            attempts.values("exam__subject")
+            .annotate(avg_score=Avg("score"))
+        )
 
+        subject_labels = []
+        subject_scores = []
+
+        for item in subject_stats:
+            subject_labels.append(item["exam__subject"])
+            subject_scores.append(float(item["avg_score"]))
+
+        context["subject_labels"] = subject_labels
+        context["subject_scores"] = subject_scores
 
         total = attempts.count()
-
-
         average = (
 
             attempts.aggregate(
                 Avg("score")
             )["score__avg"]
-
             or 0
-
         )
-
-
 
         highest = (
 
             attempts.aggregate(
                 Max("score")
             )["score__max"]
-
             or 0
-
         )
-
-
-
         passed = sum(
-
             1 for a in attempts
-
             if a.is_passed
-
         )
-
-
-
         pass_percentage = (
 
             passed/total*100
 
             if total else 0
-
         )
+        passed_count = 0
+        failed_count = 0
 
-
-
+        for attempt in attempts:
+            if attempt.is_passed:
+                passed_count += 1
+            else:
+                failed_count += 1
+        
         context.update({
-
-            "total_exams":
-            total,
-
-
-            "average_score":
-            round(average,2),
-
-
-            "highest_score":
-            highest,
-
-
-            "pass_percentage":
-            round(pass_percentage,2),
-
-
-            "attempts":
-            attempts
+            "total_exams": total,
+            "average_score": round(average, 2),
+            "highest_score": highest,
+            "pass_percentage": round(pass_percentage, 2),
+            "passed_count": passed_count,
+            "failed_count": failed_count,
+            "attempts": attempts,
         })
         return context
 # ==================================================
@@ -890,7 +866,6 @@ class ResultPDFView(LoginRequiredMixin,View):
 # ==================================================
 # AI Feedback Page
 # ==================================================
-
 class AIFeedbackView(LoginRequiredMixin, DetailView):
     model = ExamAttempt
     template_name = "exams/ai_feedback.html"
@@ -912,9 +887,7 @@ class AIFeedbackView(LoginRequiredMixin, DetailView):
             context["ai_insight"] = (
                 "You need more practice. Revise the fundamentals and attempt the exam again."
             )
-
         return context
-
 # ==================================================
 # AI Manual Generate Endpoint
 # ==================================================
@@ -983,55 +956,24 @@ def generate_ai_analysis(request,attempt_id):
 
 @login_required
 def exam_stats_api(request,pk):
-
-
     exam = get_object_or_404(
-
         Exam,
-
         pk=pk
-
     )
-
-
     attempts = ExamAttempt.objects.filter(
-
         exam=exam,
-
         is_submitted=True
-
     )
-
-
-
     total = attempts.count()
-
-
-
     data={
-
         "exam":
         exam.title,
-
-
         "subject":
         exam.subject,
-
-
         "attempts":
         total
-
     }
-
-
-    return JsonResponse(data)  
-
-from django.http import HttpResponse
-from reportlab.pdfgen import canvas
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-
-
+    return JsonResponse(data)
 @login_required
 def download_result_pdf(request, pk):
     result = get_object_or_404(

@@ -1,217 +1,164 @@
 {% extends "base.html" %}
 
-
 {% block content %}
 
 <div class="container mt-4">
 
+    <h2 class="mb-4">📊 Performance Analytics</h2>
 
-<h2 class="mb-4">
-📊 Performance Analytics
-</h2>
+    <!-- Statistics Cards -->
+    <div class="row g-4">
 
+        <div class="col-md-3">
+            <div class="card shadow text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Exams</h6>
+                    <h2>{{ total_exams }}</h2>
+                </div>
+            </div>
+        </div>
 
-<div class="row">
+        <div class="col-md-3">
+            <div class="card shadow text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Average Score</h6>
+                    <h2>{{ average_score }}</h2>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-md-3">
+            <div class="card shadow text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Highest Score</h6>
+                    <h2>{{ highest_score }}</h2>
+                </div>
+            </div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
+            <div class="card shadow text-center h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Pass Percentage</h6>
+                    <h2>{{ pass_percentage }}%</h2>
+                </div>
+            </div>
+        </div>
 
-<div class="card shadow p-3 text-center">
+    </div>
 
-<h6>Total Exams</h6>
+    <!-- Charts -->
+    <div class="row mt-5">
 
-<h2>
-{{ total_exams }}
-</h2>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Pass vs Fail</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="passFailChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Exam History -->
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+            <h4 class="mb-0">Exam History</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Exam</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for attempt in attempts %}
+
+                        <tr>
+
+                            <td>{{ attempt.exam.title }}</td>
+
+                            <td>{{ attempt.score }}/{{ attempt.total_marks }}</td>
+
+                            <td>{{ attempt.percentage }}%</td>
+
+                            <td>
+                                {% if attempt.is_passed %}
+                                    <span class="badge bg-success">PASS</span>
+                                {% else %}
+                                    <span class="badge bg-danger">FAIL</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ attempt.submitted_at|date:"d M Y" }}</td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No exams attempted yet.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
-</div>
-
-
-
-<div class="col-md-3">
-
-<div class="card shadow p-3 text-center">
-
-<h6>Average Score</h6>
-
-<h2>
-{{ average_score }}
-</h2>
-
-</div>
-
-</div>
-
-
-
-<div class="col-md-3">
-
-<div class="card shadow p-3 text-center">
-
-<h6>Highest Score</h6>
-
-<h2>
-{{ highest_score }}
-</h2>
-
-</div>
-
-</div>
-
-
-
-<div class="col-md-3">
-
-<div class="card shadow p-3 text-center">
-
-<h6>Pass %</h6>
-
-<h2>
-{{ pass_percentage }}%
-</h2>
-
-</div>
-
-</div>
-
-
-</div>
-
-
-
-<hr class="mt-4">
-
-
-<h3>
-Exam History
-</h3>
-
-
-<table class="table table-bordered mt-3">
-
-
-<thead class="table-dark">
-
-<tr>
-
-<th>
-Exam
-</th>
-
-
-<th>
-Score
-</th>
-
-
-<th>
-Percentage
-</th>
-
-
-<th>
-Status
-</th>
-
-
-<th>
-Date
-</th>
-
-
-</tr>
-
-</thead>
-
-
-
-<tbody>
-
-
-{% for attempt in attempts %}
-
-
-<tr>
-
-
-<td>
-{{ attempt.exam.title }}
-</td>
-
-
-
-<td>
-{{ attempt.score }}/{{ attempt.total_marks }}
-</td>
-
-
-
-<td>
-{{ attempt.percentage }}%
-</td>
-
-
-
-<td>
-
-
-{% if attempt.is_passed %}
-
-<span class="badge bg-success">
-PASS
-</span>
-
-
-{% else %}
-
-<span class="badge bg-danger">
-FAIL
-</span>
-
-
-{% endif %}
-
-
-</td>
-
-
-
-<td>
-{{ attempt.submitted_at|date:"d M Y" }}
-</td>
-
-
-</tr>
-
-
-
-{% empty %}
-
-
-<tr>
-
-<td colspan="5" class="text-center">
-
-No exams attempted
-
-</td>
-
-</tr>
-
-
-{% endfor %}
-
-
-
-</tbody>
-
-
-</table>
-
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx = document.getElementById("passFailChart");
+
+new Chart(ctx, {
+    type: "pie",
+    data: {
+        labels: ["Pass", "Fail"],
+        datasets: [{
+            data: [
+                {{ passed_count }},
+                {{ failed_count }}
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: "bottom"
+            }
+        }
+    }
+});
+
+</script>
 
 {% endblock %}

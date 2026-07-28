@@ -72,7 +72,7 @@ def build_certificate_pdf(buffer, attempt):
         settings.BASE_DIR,
         "static",
         "images",
-        "logo.png"
+        "Ai_exam_portal_logo.avif"
     )
 
     if os.path.exists(logo_path):

@@ -70,17 +70,16 @@
 
         <div class="progress" style="height: 24px;">
             <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                 role="progressbar"
-                 style="width: {{ pass_percentage|default:0 }}%"
-                 aria-valuenow="{{ pass_percentage|default:0 }}"
-                 aria-valuemin="0"
-                 aria-valuemax="100">
+                role="progressbar"
+                style="width: {{ pass_percentage|default:0 }}%;"
+                aria-valuenow="{{ pass_percentage|default:0 }}"
+                aria-valuemin="0"
+                aria-valuemax="100">
                 {{ pass_percentage|default:0 }}%
             </div>
         </div>
     </div>
 </div>
-
 <!-- Charts -->
 <div class="row g-4 mb-4">
 
@@ -144,7 +143,7 @@
                     <div class="progress" style="height: 12px;">
                         <div class="progress-bar bg-primary"
                              role="progressbar"
-                             style="width: {{ stat.avg_score|default:0|floatformat:0 }}%">
+                             style="width: {{ stat.avg_score|default:0 }}%">
                         </div>
                     </div>
 
@@ -203,7 +202,7 @@
 
                             <td>
                                 <span class="fw-semibold">
-                                    {{ attempt.percentage }}%
+                                    {{ attempt.percentage|floatformat:1 }}%
                                 </span>
                             </td>
 
@@ -258,12 +257,16 @@
 const subjectLabels = [
     {% for s in subject_stats %}
         "{{ s.exam__subject }}"{% if not forloop.last %},{% endif %}
+    {% empty %}
+        "No Data"
     {% endfor %}
 ];
 
 const subjectScores = [
     {% for s in subject_stats %}
         {{ s.avg_score|default:0|floatformat:0 }}{% if not forloop.last %},{% endif %}
+    {% empty %}
+        0
     {% endfor %}
 ];
 
@@ -311,12 +314,16 @@ new Chart(document.getElementById('resultChart'), {
 const monthlyLabels = [
     {% for m in monthly_attempts %}
         "{{ m.month|date:'M Y' }}"{% if not forloop.last %},{% endif %}
+    {% empty %}
+        "No Data"
     {% endfor %}
 ];
 
 const monthlyCounts = [
     {% for m in monthly_attempts %}
         {{ m.count|default:0 }}{% if not forloop.last %},{% endif %}
+    {% empty %}
+        0
     {% endfor %}
 ];
 
