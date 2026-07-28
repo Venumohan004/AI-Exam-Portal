@@ -61,20 +61,66 @@ The application focuses on automation, transparency, scalability, and data-drive
 
 # 🖼 Screenshots
 
-| Module | Preview |
-|---------|---------|
-| Login | `static/images/login.jpeg` |
-| Dashboard | `static/images/dashboard.jpeg` |
-| Exam List | `static/images/exams.png` |
-| Exam Instructions | `static/images/exam_instructions.png` |
-| Exam Page | `static/images/exam_start_end_warning_sec.jpeg` |
-| Result | `static/images/result_page.jpeg` |
-| Analytics | `static/images/analytics.jpeg` |
-| Negative marks | `static/images/exam_result_negative-marks.jpeg` |
-| Certificate | `static/images/exam-certificate.jpeg` |
-| AI-Feedback | `static/images/ai-feedback2.jpeg` |
+## 🔐 Login Page
+
+![Login Page](static/images/login.jpeg)
 
 ---
+
+## 📊 Dashboard
+
+![Dashboard](static/images/dashboard.jpeg)
+
+---
+
+## 📝 Exam List
+
+![Exam List](static/images/exams.png)
+
+---
+
+## 📋 Exam Instructions
+
+![Exam Instructions](static/images/exam_instructions.jpeg)
+
+---
+
+## ⏱️ Exam Page
+
+![Exam Page](static/images/exam_start_end_warning_sec.jpeg)
+
+---
+
+## 📈 Result Page
+
+![Result Page](static/images/result_page.jpeg)
+
+---
+
+## 📊 Analytics Dashboard
+
+![Analytics Dashboard](static/images/analytics.jpeg)
+
+---
+
+## ➖ Negative Marking
+
+![Negative Marking](static/images/exam_result_negative-marks.jpeg)
+
+---
+
+## 🎓 Certificate Generation
+
+![Certificate](static/images/exam-certificate.jpeg)
+
+---
+
+## 🤖 AI Feedback
+
+![AI Feedback](static/images/ai-feedback2.jpeg)
+
+---
+
 # ⭐ Key Features
 
 ## Examination Management
