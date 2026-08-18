@@ -3,38 +3,173 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
+
 <div class="row justify-content-center">
     <div class="col-12 col-sm-10 col-md-6 col-lg-5">
 
-        <div class="card shadow">
+        <div class="card shadow rounded-4 overflow-hidden">
+
             <div class="card-header bg-primary text-white text-center">
                 <h3 class="mb-0">Create Account</h3>
             </div>
 
             <div class="card-body">
+
                 <form method="post">
                     {% csrf_token %}
 
                     {% for field in form %}
+
                         <div class="mb-3">
-                            <label class="form-label">{{ field.label }}</label>
+
+                            <label class="form-label">
+                                {{ field.label }}
+                            </label>
+
                             {{ field }}
 
+                            {% if field.name == "password1" %}
+
+                                <div class="mt-2">
+
+                                    <small class="fw-bold">
+                                        Password requirements:
+                                    </small>
+
+                                    <ul class="list-unstyled small mb-0">
+
+                                        <li id="length-check">
+                                            ❌ At least 6 characters
+                                        </li>
+
+                                        <li id="uppercase-check">
+                                            ❌ At least one uppercase letter
+                                        </li>
+
+                                        <li id="lowercase-check">
+                                            ❌ At least one lowercase letter
+                                        </li>
+
+                                        <li id="number-check">
+                                            ❌ At least one number
+                                        </li>
+
+                                        <li id="special-check">
+                                            ❌ At least one special character
+                                        </li>
+
+                                    </ul>
+
+                                    <div class="mt-2">
+                                        <small>
+                                            Example:
+                                            <code>Abc@123</code>
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                            {% endif %}
+
+                            {% if field.name == "password2" %}
+                                <div class="form-text">
+                                    Make sure both passwords are the same.
+                                </div>
+                            {% endif %}
+
                             {% if field.errors %}
-                                <div class="text-danger small">
+                                <div class="text-danger small mt-1">
                                     {{ field.errors }}
                                 </div>
                             {% endif %}
+
                         </div>
+
                     {% endfor %}
 
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit"
+                            class="btn btn-primary w-100 rounded-pill">
                         Register
                     </button>
+
                 </form>
+
             </div>
         </div>
 
     </div>
 </div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const passwordInput = document.getElementById("id_password1");
+
+    if (!passwordInput) {
+        return;
+    }
+
+    passwordInput.addEventListener("input", function () {
+
+        const password = passwordInput.value;
+
+        updateRequirement(
+            "length-check",
+            password.length >= 6,
+            "At least 6 characters"
+        );
+
+        updateRequirement(
+            "uppercase-check",
+            /[A-Z]/.test(password),
+            "At least one uppercase letter"
+        );
+
+        updateRequirement(
+            "lowercase-check",
+            /[a-z]/.test(password),
+            "At least one lowercase letter"
+        );
+
+        updateRequirement(
+            "number-check",
+            /[0-9]/.test(password),
+            "At least one number"
+        );
+
+        updateRequirement(
+            "special-check",
+            /[^A-Za-z0-9]/.test(password),
+            "At least one special character"
+        );
+
+    });
+
+
+    function updateRequirement(id, valid, text) {
+
+        const element = document.getElementById(id);
+
+        if (valid) {
+
+            element.innerHTML = "✅ " + text;
+            element.classList.remove("text-danger");
+            element.classList.add("text-success");
+
+        } else {
+
+            element.innerHTML = "❌ " + text;
+            element.classList.remove("text-success");
+            element.classList.add("text-danger");
+
+        }
+
+    }
+
+});
+
+</script>
+
 {% endblock %}

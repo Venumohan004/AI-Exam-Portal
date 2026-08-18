@@ -6,7 +6,7 @@
 <div class="row justify-content-center">
     <div class="col-12 col-sm-10 col-md-5 col-lg-4">
 
-        <div class="card shadow">
+        <div class="card shadow rounded-4 overflow-hidden">
             <div class="card-header bg-success text-white text-center">
                 <h3 class="mb-0">Login</h3>
             </div>
@@ -16,7 +16,7 @@
                     {% csrf_token %}
                     {{ form.as_p }}
 
-                    <button type="submit" class="btn btn-success w-100">
+                    <button type="submit" class="btn btn-success w-100 rounded-pill">
                         Login
                     </button>
                 </form>

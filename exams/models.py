@@ -77,7 +77,7 @@ class Question(models.Model):
     )
     question_text = models.TextField()
 
-    marks = models.PositiveIntegerField(
+    marks = models.FloatField(
         default=1
     )
 
