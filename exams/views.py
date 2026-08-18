@@ -558,19 +558,11 @@ class SubmitExamView(LoginRequiredMixin,View):
                         question=question,
 
                         defaults={
-
                             "selected_option":
                             option
-
                         }
-
                     )
-
                 )
-
-
-
-                negative_marks = question.marks * 0.25
 
                 if option.is_correct:
 
@@ -579,8 +571,13 @@ class SubmitExamView(LoginRequiredMixin,View):
 
                 else:
 
-                    answer.marks_awarded = -negative_marks
-                    score -= negative_marks
+                    if attempt.exam.negative_marking:
+                        negative_marks = attempt.exam.negative_marks
+                        answer.marks_awarded = -negative_marks
+                        score -= negative_marks
+
+                    else:
+                        answer.marks_awarded = 0
 
                 answer.save()
 

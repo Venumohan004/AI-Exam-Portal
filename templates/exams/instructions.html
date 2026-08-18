@@ -8,19 +8,29 @@
 
     <div class="card shadow">
 
+        <!-- Exam Header -->
         <div class="card-header bg-primary text-white">
-            <h3>{{ exam.title }}</h3>
+            <h3 class="mb-0">{{ exam.title }}</h3>
         </div>
 
         <div class="card-body">
 
-            <h5>Exam Details</h5>
+            <!-- Exam Details -->
+            <h5 class="mb-3">
+                <i class="bi bi-info-circle"></i>
+                Exam Details
+            </h5>
 
             <ul class="list-group mb-4">
 
                 <li class="list-group-item">
                     <strong>Subject:</strong>
                     {{ exam.subject }}
+                </li>
+
+                <li class="list-group-item">
+                    <strong>Difficulty:</strong>
+                    {{ exam.difficulty }}
                 </li>
 
                 <li class="list-group-item">
@@ -33,31 +43,163 @@
                     {{ exam.questions.count }}
                 </li>
 
+                <!-- Negative Marking Status -->
+                <li class="list-group-item">
+
+                    <strong>Negative Marking:</strong>
+
+                    {% if exam.negative_marking %}
+
+                        <span class="badge bg-danger">
+                            ON
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-success">
+                            OFF
+                        </span>
+
+                    {% endif %}
+
+                </li>
+
             </ul>
 
-            <h5>Instructions</h5>
 
-            <ul>
+            <!-- Instructions -->
+            <h5 class="mb-3">
+                <i class="bi bi-list-check"></i>
+                Instructions
+            </h5>
 
-                <li>Read every question carefully.</li>
+            <ul class="list-group mb-4">
 
-                <li>Each question has only one correct answer.</li>
+                <li class="list-group-item">
+                    <i class="bi bi-check-circle text-success"></i>
+                    Read every question carefully.
+                </li>
 
-                <li>Timer starts immediately after clicking Start Exam.</li>
+                <li class="list-group-item">
+                    <i class="bi bi-check-circle text-success"></i>
+                    Each question has only one correct answer.
+                </li>
 
-                <li>When time finishes, the exam is submitted automatically.</li>
+                <li class="list-group-item">
+                    <i class="bi bi-clock text-primary"></i>
+                    Timer starts immediately after clicking Start Exam.
+                </li>
 
-                <li>Do not refresh or close the browser.</li>
+                <li class="list-group-item">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    When time finishes, the exam is submitted automatically.
+                </li>
 
-                <li>You can submit before the timer ends.</li>
+                <li class="list-group-item">
+                    <i class="bi bi-shield-exclamation text-danger"></i>
+                    Do not refresh or close the browser during the exam.
+                </li>
+
+                <li class="list-group-item">
+                    <i class="bi bi-send text-primary"></i>
+                    You can submit before the timer ends.
+                </li>
+
+
+                <!-- NEGATIVE MARKING ON -->
+                {% if exam.negative_marking %}
+
+                    <li class="list-group-item list-group-item-danger">
+
+                        <i class="bi bi-dash-circle"></i>
+
+                        <strong>Negative Marking:</strong>
+
+                        {{ exam.negative_marks }} marks will be deducted
+                        for each incorrect answer.
+
+                    </li>
+
+                    <li class="list-group-item">
+
+                        <i class="bi bi-check-circle text-success"></i>
+
+                        Correct answer:
+                        <strong>+1 mark</strong>
+
+                    </li>
+
+                    <li class="list-group-item">
+
+                        <i class="bi bi-dash-circle text-danger"></i>
+
+                        Incorrect answer:
+                        <strong>-{{ exam.negative_marks }} marks</strong>
+
+                    </li>
+
+                    <li class="list-group-item">
+
+                        <i class="bi bi-circle text-secondary"></i>
+
+                        Unanswered question:
+                        <strong>0 marks</strong>
+
+                    </li>
+
+
+                <!-- NEGATIVE MARKING OFF -->
+                {% else %}
+
+                    <li class="list-group-item list-group-item-success">
+
+                        <i class="bi bi-check-circle"></i>
+
+                        <strong>No Negative Marking:</strong>
+
+                        No marks will be deducted for incorrect answers.
+
+                    </li>
+
+                    <li class="list-group-item">
+
+                        <i class="bi bi-check-circle text-success"></i>
+
+                        Correct answer:
+                        <strong>+1 mark</strong>
+
+                    </li>
+
+                    <li class="list-group-item">
+
+                        <i class="bi bi-x-circle text-danger"></i>
+
+                        Incorrect answer:
+                        <strong>0 marks</strong>
+
+                    </li>
+
+                    <li class="list-group-item">
+
+                        <i class="bi bi-circle text-secondary"></i>
+
+                        Unanswered question:
+                        <strong>0 marks</strong>
+
+                    </li>
+
+                {% endif %}
 
             </ul>
 
+
+            <!-- Start Exam -->
             <div class="text-center mt-4">
 
                 <a href="{% url 'start_exam' exam.id %}"
-                   class="btn btn-success btn-lg">
+                   class="btn btn-success btn-lg px-4">
 
+                    <i class="bi bi-play-circle"></i>
                     Start Exam
 
                 </a>

@@ -21,6 +21,16 @@ class Exam(models.Model):
 
     duration_minutes = models.PositiveIntegerField(default=30)
 
+    negative_marking = models.BooleanField(
+        default=False,
+        help_text="Enable negative marking for incorrect answers."
+    )
+
+    negative_marks = models.FloatField(
+        default=0.25,
+        help_text="Marks deducted for each incorrect answer."
+    )
+
     difficulty = models.CharField(
         max_length=10,
         choices=DIFFICULTY_CHOICES
@@ -202,8 +212,6 @@ class ExamAttempt(models.Model):
 
         return f"{self.student.username} - {self.exam.title}"
 
-
-
     # Percentage
     @property
     def percentage(self):
@@ -216,25 +224,17 @@ class ExamAttempt(models.Model):
             (self.score / self.total_marks) * 100,
             2
         )
-
-
-
     # Pass / Fail
     @property
     def is_passed(self):
 
         return self.percentage >= 40
 
-
-
     # Result Status
     @property
     def result_status(self):
 
         return "PASS" if self.is_passed else "FAIL"
-
-
-
 
 # =========================
 # Student Answer Model
@@ -260,7 +260,6 @@ class StudentAnswer(models.Model):
         null=True,
         blank=True
     )
-
 
     marks_awarded = models.FloatField(
         default=0
