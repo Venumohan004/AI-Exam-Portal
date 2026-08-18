@@ -31,6 +31,10 @@ class Exam(models.Model):
         help_text="Marks deducted for each incorrect answer."
     )
 
+    marks_per_question = models.FloatField(
+        default=1,
+        help_text="Marks awarded for each correct answer."
+    )
     difficulty = models.CharField(
         max_length=10,
         choices=DIFFICULTY_CHOICES
@@ -44,15 +48,12 @@ class Exam(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True
     )
-
-
+    
     class Meta:
         ordering = ['-created_at']
 
-
     def __str__(self):
         return self.title
-
 
     @property
     def question_count(self):

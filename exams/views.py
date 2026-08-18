@@ -524,11 +524,9 @@ class SubmitExamView(LoginRequiredMixin,View):
         total_marks = 0
         score = 0
         for question in attempt.exam.questions.all():
-
-
-            total_marks += question.marks
-
-
+            
+            total_marks += attempt.exam.marks_per_question
+            
             option_id = request.POST.get(
 
                 f"question_{question.id}"
@@ -537,26 +535,15 @@ class SubmitExamView(LoginRequiredMixin,View):
 
 
             if option_id:
-
-
                 option = get_object_or_404(
-
                     Option,
-
                     id=option_id
-
                 )
-
-
                 answer, created = (
-
                     StudentAnswer.objects
                     .update_or_create(
-
                         attempt=attempt,
-
                         question=question,
-
                         defaults={
                             "selected_option":
                             option
@@ -565,10 +552,8 @@ class SubmitExamView(LoginRequiredMixin,View):
                 )
 
                 if option.is_correct:
-
-                    answer.marks_awarded = question.marks
-                    score += question.marks
-
+                    answer.marks_awarded = attempt.exam.marks_per_question
+                    score += attempt.exam.marks_per_question
                 else:
 
                     if attempt.exam.negative_marking:
