@@ -167,17 +167,11 @@ class ExamAttempt(models.Model):
         null=True,
         blank=True
     )
-
-
     score = models.FloatField(
         default=0
     )
 
-
-    total_marks = models.PositiveIntegerField(
-        default=0
-    )
-
+    total_marks = models.FloatField(default=0)
 
     is_submitted = models.BooleanField(
         default=False

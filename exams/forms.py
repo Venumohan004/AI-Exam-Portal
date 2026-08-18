@@ -7,17 +7,35 @@ from .models import Exam, Question, Option
 class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
+
         fields = [
             'title',
             'subject',
             'description',
             'duration_minutes',
+            'marks_per_question',
+            'negative_marking',
+            'negative_marks',
             'difficulty'
         ]
+
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
-        }
 
+            'marks_per_question': forms.NumberInput(
+                attrs={
+                    'step': '0.25',
+                    'min': '0'
+                }
+            ),
+
+            'negative_marks': forms.NumberInput(
+                attrs={
+                    'step': '0.25',
+                    'min': '0'
+                }
+            ),
+        }
 
 # Question form
 class QuestionForm(forms.ModelForm):
