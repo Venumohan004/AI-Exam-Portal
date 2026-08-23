@@ -17,7 +17,7 @@ class OptionInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'exam', 'question_text', 'marks']
+    list_display = ['id', 'exam', 'question_text' ]
     search_fields = ['question_text', 'exam__title']
     inlines = [OptionInline]
 

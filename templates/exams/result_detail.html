@@ -136,11 +136,11 @@
                     <strong>Marks Awarded:</strong>
                     {% if answer.marks_awarded < 0 %}
                         <span class="text-danger fw-bold">
-                            {{ answer.marks_awarded }} / {{ answer.question.marks }}
+                            {{ answer.marks_awarded }} / {{ attempt.exam.marks_per_question }}
                         </span>
                     {% else %}
                         <span class="text-success fw-bold">
-                            {{ answer.marks_awarded }} / {{ answer.question.marks }}
+                            {{ answer.marks_awarded }} / {{ attempt.exam.marks_per_question }}
                         </span>
                     {% endif %}
                 </p>
