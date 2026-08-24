@@ -102,12 +102,6 @@ urlpatterns = [
     ),
 
     path(
-        'results/<int:pk>/pdf/',
-        ResultPDFView.as_view(),
-        name='result_pdf'
-    ),
-
-    path(
         'analytics/',
         PerformanceAnalyticsView.as_view(),
         name='performance_analytics'

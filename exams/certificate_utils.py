@@ -385,54 +385,88 @@ def build_certificate_pdf(buffer, attempt):
     )
 
     # ==================================================
-    # Signature Line
+    # PROFESSIONAL EXAM ADMINISTRATOR SIGNATURE
     # ==================================================
 
-    pdf.setStrokeColor(black)
+    signature_x = width - 175
+
+    signature_path = os.path.join(
+        settings.BASE_DIR,
+        "static",
+        "images",
+        "sig-no-bg.png"
+    )
+
+    # Signature image - directly above signature line
+    if os.path.exists(signature_path):
+        pdf.drawImage(
+            signature_path,
+            width - 245,   # X position
+            88,            # Y position - just above line
+            width=120,     # Signature width
+            height=35,     # Signature height
+            mask="auto"
+        )
+
+    # Signature line
+    pdf.setStrokeColor(
+        HexColor("#333333")
+    )
 
     pdf.setLineWidth(1)
 
     pdf.line(
         width - 260,
-        90,
+        88,
         width - 90,
-        90
+        88
     )
+
+    # Administrator title
+    pdf.setFillColor(darkblue)
 
     pdf.setFont(
         "Helvetica-Bold",
-        13
+        12
     )
 
     pdf.drawCentredString(
-        width - 175,
-        75,
+        signature_x,
+        73,
         "Exam Administrator"
     )
 
+    # Authorized signature
     pdf.setFont(
         "Helvetica",
-        11
+        9
+    )
+
+    pdf.setFillColor(
+        HexColor("#666666")
     )
 
     pdf.drawCentredString(
-        width - 175,
-        55,
-        "AI Exam Portal"
+        signature_x,
+        59,
+        "Authorized Signature"
     )
 
+    # Portal name
+    pdf.drawCentredString(
+        signature_x,
+        46,
+        "AI Exam Portal"
+    )
     # ==================================================
     # Footer
     # ==================================================
 
     pdf.setFont(
-        "Helvetica-Oblique",
-        10
+        "Helvetica",
+        8
     )
-    pdf.setFont(
-            "Helvetica-Bold",
-            8
-        )
+
     pdf.setFillColor(
         HexColor("#666666")
     )
