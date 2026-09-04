@@ -1,4 +1,3 @@
-@"
 # Python
 __pycache__/
 *.py[cod]
@@ -11,11 +10,15 @@ env/
 
 # Django
 db.sqlite3
+db.sqlite3-journal
 staticfiles/
 
 # Environment variables
 .env
 .env.*
+
+# Media/uploads
+media/
 
 # IDE
 .vscode/
@@ -24,4 +27,7 @@ staticfiles/
 # OS
 .DS_Store
 Thumbs.db
-"@ | Set-Content .gitignore
+
+# Testing / tooling
+.pytest_cache/
+.mypy_cache/

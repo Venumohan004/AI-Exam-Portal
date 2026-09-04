@@ -499,7 +499,6 @@ class TakeExamView(LoginRequiredMixin, View):
 
 class SubmitExamView(LoginRequiredMixin,View):
 
-
     def post(self,request,attempt_id):
 
         attempt = get_object_or_404(
